@@ -1,0 +1,402 @@
+[
+    {
+      "natural_input": "给我开个视频会议切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_video"
+      },
+      "policy_gt": {
+        "policy_id": "gt_001",
+        "qos_profile": {
+          "latency_max_ms": 80,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 2000,
+          "reliability_min": 0.999,
+          "priority": 3
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "给我建一个高清视频会议的专用网络。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_video"
+      },
+      "policy_gt": {
+        "policy_id": "gt_002",
+        "qos_profile": {
+          "latency_max_ms": 80,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 2000,
+          "reliability_min": 0.999,
+          "priority": 3
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "为实时语音通话开一个专用通道，延迟要低。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_voice_call"
+      },
+      "policy_gt": {
+        "policy_id": "gt_003",
+        "qos_profile": {
+          "latency_max_ms": 120,
+          "jitter_max_ms": 20,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 50,
+          "reliability_min": 0.99,
+          "priority": 2
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "我要开个语音业务的切片，不能卡。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_voice_call"
+      },
+      "policy_gt": {
+        "policy_id": "gt_004",
+        "qos_profile": {
+          "latency_max_ms": 120,
+          "jitter_max_ms": 20,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 50,
+          "reliability_min": 0.99,
+          "priority": 2
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "给 XR 游戏业务建个低时延网络。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_xr_gaming"
+      },
+      "policy_gt": {
+        "policy_id": "gt_005",
+        "qos_profile": {
+          "latency_max_ms": 15,
+          "jitter_max_ms": 5,
+          "packet_loss_rate_max": 0.005,
+          "bandwidth_min_kbps": 100000,
+          "reliability_min": 0.999,
+          "priority": 4
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "我想玩 XR 游戏，需要非常低延迟的切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "realtime_xr_gaming"
+      },
+      "policy_gt": {
+        "policy_id": "gt_006",
+        "qos_profile": {
+          "latency_max_ms": 15,
+          "jitter_max_ms": 5,
+          "packet_loss_rate_max": 0.005,
+          "bandwidth_min_kbps": 100000,
+          "reliability_min": 0.999,
+          "priority": 4
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "我要看 4K 视频流，请给我设置一个合适的切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "streaming_video"
+      },
+      "policy_gt": {
+        "policy_id": "gt_007",
+        "qos_profile": {
+          "latency_max_ms": 150,
+          "jitter_max_ms": 30,
+          "packet_loss_rate_max": 0.02,
+          "bandwidth_min_kbps": 5000,
+          "reliability_min": 0.995,
+          "priority": 2
+        },
+        "routing_pref": "balanced_bandwidth",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "直播推流的网络要稳一点，帮我建个切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "streaming_live"
+      },
+      "policy_gt": {
+        "policy_id": "gt_008",
+        "qos_profile": {
+          "latency_max_ms": 150,
+          "jitter_max_ms": 15,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 10000,
+          "reliability_min": 0.99,
+          "priority": 3
+        },
+        "routing_pref": "balanced_bandwidth",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "我要传输一个大文件，需要一个下载比较快的切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "file_transfer"
+      },
+      "policy_gt": {
+        "policy_id": "gt_009",
+        "qos_profile": {
+          "latency_max_ms": 150,
+          "jitter_max_ms": 50,
+          "packet_loss_rate_max": 0.02,
+          "bandwidth_min_kbps": 5000,
+          "reliability_min": 0.999,
+          "priority": 1
+        },
+        "routing_pref": "balanced_bandwidth",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "工厂里的传感器数据要实时上传，不要掉包。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "iot_sensor"
+      },
+      "policy_gt": {
+        "policy_id": "gt_010",
+        "qos_profile": {
+          "latency_max_ms": 50,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.001,
+          "bandwidth_min_kbps": 200,
+          "reliability_min": 0.9999,
+          "priority": 3
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "传感器采集的数据必须实时上传，需要高可靠网络。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "iot_sensor"
+      },
+      "policy_gt": {
+        "policy_id": "gt_011",
+        "qos_profile": {
+          "latency_max_ms": 50,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.001,
+          "bandwidth_min_kbps": 200,
+          "reliability_min": 0.9999,
+          "priority": 3
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "给普通上网业务开一个基础切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "internet_access"
+      },
+      "policy_gt": {
+        "policy_id": "gt_012",
+        "qos_profile": {
+          "latency_max_ms": 150,
+          "jitter_max_ms": 30,
+          "packet_loss_rate_max": 0.02,
+          "bandwidth_min_kbps": 10000,
+          "reliability_min": 0.98,
+          "priority": 1
+        },
+        "routing_pref": "balanced_bandwidth",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "我想要一个普通上网用的网络切片就够了。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "internet_access"
+      },
+      "policy_gt": {
+        "policy_id": "gt_013",
+        "qos_profile": {
+          "latency_max_ms": 150,
+          "jitter_max_ms": 30,
+          "packet_loss_rate_max": 0.02,
+          "bandwidth_min_kbps": 10000,
+          "reliability_min": 0.98,
+          "priority": 1
+        },
+        "routing_pref": "balanced_bandwidth",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "工厂机器人控制需要超低时延的网络，帮我建个切片。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "urllc_control"
+      },
+      "policy_gt": {
+        "policy_id": "gt_014",
+        "qos_profile": {
+          "latency_max_ms": 5,
+          "jitter_max_ms": 1,
+          "packet_loss_rate_max": 0.00001,
+          "bandwidth_min_kbps": 1000,
+          "reliability_min": 0.999999,
+          "priority": 5
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "机器人抓取控制的网络必须是 URLLC 级别。",
+      "intent_gt": {
+        "intent_type": "slice_create",
+        "service_type": "urllc_control"
+      },
+      "policy_gt": {
+        "policy_id": "gt_015",
+        "qos_profile": {
+          "latency_max_ms": 5,
+          "jitter_max_ms": 1,
+          "packet_loss_rate_max": 0.00001,
+          "bandwidth_min_kbps": 1000,
+          "reliability_min": 0.999999,
+          "priority": 5
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "把视频会议业务迁到低延迟路径上。",
+      "intent_gt": {
+        "intent_type": "route_preference",
+        "service_type": "realtime_video"
+      },
+      "policy_gt": {
+        "policy_id": "gt_016",
+        "qos_profile": {
+          "latency_max_ms": 80,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 2000,
+          "reliability_min": 0.999,
+          "priority": 3
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "把 XR 游戏业务切到低延迟优先级的路由上。",
+      "intent_gt": {
+        "intent_type": "route_preference",
+        "service_type": "realtime_xr_gaming"
+      },
+      "policy_gt": {
+        "policy_id": "gt_017",
+        "qos_profile": {
+          "latency_max_ms": 15,
+          "jitter_max_ms": 5,
+          "packet_loss_rate_max": 0.005,
+          "bandwidth_min_kbps": 100000,
+          "reliability_min": 0.999,
+          "priority": 4
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "调优实时语音切片的配置，让延迟再低一点。",
+      "intent_gt": {
+        "intent_type": "slice_qos_modify",
+        "service_type": "realtime_voice_call"
+      },
+      "policy_gt": {
+        "policy_id": "gt_018",
+        "qos_profile": {
+          "latency_max_ms": 120,
+          "jitter_max_ms": 20,
+          "packet_loss_rate_max": 0.01,
+          "bandwidth_min_kbps": 50,
+          "reliability_min": 0.99,
+          "priority": 2
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "any"
+      }
+    },
+    {
+      "natural_input": "限制 IoT 设备只能访问指定的网络切片。",
+      "intent_gt": {
+        "intent_type": "access_control",
+        "service_type": "iot_sensor"
+      },
+      "policy_gt": {
+        "policy_id": "gt_019",
+        "qos_profile": {
+          "latency_max_ms": 50,
+          "jitter_max_ms": 10,
+          "packet_loss_rate_max": 0.001,
+          "bandwidth_min_kbps": 200,
+          "reliability_min": 0.9999,
+          "priority": 3
+        },
+        "routing_pref": "balanced_latency",
+        "allowed_ue_group": "iot_only"
+      }
+    },
+    {
+      "natural_input": "只允许机器人控制流进入 URLLC 切片，其他都禁止。",
+      "intent_gt": {
+        "intent_type": "access_control",
+        "service_type": "urllc_control"
+      },
+      "policy_gt": {
+        "policy_id": "gt_020",
+        "qos_profile": {
+          "latency_max_ms": 5,
+          "jitter_max_ms": 1,
+          "packet_loss_rate_max": 0.00001,
+          "bandwidth_min_kbps": 1000,
+          "reliability_min": 0.999999,
+          "priority": 5
+        },
+        "routing_pref": "low_latency",
+        "allowed_ue_group": "urllc_only"
+      }
+    }
+  ]
