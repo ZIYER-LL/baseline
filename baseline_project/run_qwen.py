@@ -36,13 +36,14 @@ def run_qwen(prompt: str):
     print(f"输入token数量: {inputs['input_ids'].shape[1]}")
 
     try:
-        # 使用最基本的参数避免警告
+        # 使用最基本的参数，避免生成过多内容
         generate_kwargs = {
             "input_ids": inputs["input_ids"],
             "attention_mask": inputs.get("attention_mask"),
-            "max_new_tokens": 512,
+            "max_new_tokens": 100,  # 减少token数量，只需要JSON输出
             "do_sample": False,
             "pad_token_id": tokenizer.eos_token_id,
+            "eos_token_id": tokenizer.eos_token_id,  # 遇到eos立即停止
         }
 
         # 只在需要时添加参数
@@ -61,3 +62,4 @@ def run_qwen(prompt: str):
         import traceback
         traceback.print_exc()
         return ""
+
