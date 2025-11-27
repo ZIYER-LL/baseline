@@ -126,6 +126,63 @@ def evaluate_policy(policy_pred: dict, rulebook: dict):
 
 
 # ================================
+# 智能JSON解析（改进版）
+# ================================
+def smart_json_parse(text: str, json_type="intent"):
+    """
+    改进的JSON解析函数，能够从模型输出中智能提取正确的JSON
+    """
+    import re
+
+    # 1. 先尝试标准解析
+    result, success = safe_json_parse(text)
+    if success:
+        return result, True
+
+    # 2. 智能提取逻辑
+    print(f"标准解析失败，尝试智能提取{json_type} JSON...")
+
+    # 查找所有JSON对象
+    json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+    json_matches = re.findall(json_pattern, text)
+
+    print(f"  找到 {len(json_matches)} 个JSON对象")
+
+    best_json = None
+    for i, json_str in enumerate(json_matches):
+        try:
+            parsed = json.loads(json_str)
+
+            if json_type == "intent":
+                # Intent JSON验证
+                intent_type = parsed.get('intent_type', '')
+                service_type = parsed.get('service_type', '')
+                if (intent_type and intent_type not in ['xxx', 'intent_type'] and
+                    service_type and service_type not in ['yyy', 'service_type']):
+                    best_json = parsed
+                    print(f"  ✅ 找到有效的Intent JSON: {intent_type}, {service_type}")
+                    break
+
+            elif json_type == "policy":
+                # Policy JSON验证
+                required_fields = ["policy_id", "qos_profile", "routing_pref", "allowed_ue_group"]
+                if all(field in parsed for field in required_fields):
+                    qos_profile = parsed.get("qos_profile", {})
+                    if isinstance(qos_profile, dict) and len(qos_profile) > 0:
+                        best_json = parsed
+                        print(f"  ✅ 找到有效的Policy JSON: policy_id={parsed.get('policy_id')}")
+                        break
+
+        except Exception as e:
+            continue
+
+    if best_json:
+        return best_json, True
+    else:
+        print(f"  ❌ 无法找到有效的{json_type} JSON")
+        return None, False
+
+# ================================
 # 端到端评测（自然语言 → 模型 → Intent + Policy）
 # ================================
 def evaluate_sample(natural_input: str, intent_gt: dict, rulebook: dict, model_fn):
@@ -143,26 +200,19 @@ def evaluate_sample(natural_input: str, intent_gt: dict, rulebook: dict, model_f
     # ==========================
     # Step 1：构造 Intent prompt
     # ==========================
-    intent_prompt = f"""
-你是一个6G核心网的意图识别助手。
+    intent_prompt = f"""任务：从用户输入中识别intent_type和service_type。
 
-任务：
-从用户的自然语言中识别两个字段：
-1）intent_type（取值范围：slice_create / slice_qos_modify / route_preference / access_control）
-2）service_type（取值范围：realtime_video / realtime_voice_call / realtime_xr_gaming /
-                 streaming_video / streaming_live / file_transfer / iot_sensor /
-                 internet_access / urllc_control）
-
-要求：
-- 严格输出JSON
-- 不要输出解释
+可选值：
+intent_type: slice_create, slice_qos_modify, route_preference, access_control
+service_type: realtime_video, realtime_voice_call, realtime_xr_gaming, streaming_video, streaming_live, file_transfer, iot_sensor, internet_access, urllc_control
 
 用户输入：{natural_input}
-"""
+
+只输出JSON，不要任何其他文字："""
 
     # 模型输出 Intent
     intent_raw = model_fn(intent_prompt)
-    intent_pred, ok_intent = safe_json_parse(intent_raw)
+    intent_pred, ok_intent = smart_json_parse(intent_raw, "intent")
 
     if not ok_intent:
         # Intent 都无法解析 → policy 也不测试了
@@ -184,30 +234,20 @@ def evaluate_sample(natural_input: str, intent_gt: dict, rulebook: dict, model_f
     # ==========================
     # Step 2：构造 Policy prompt
     # ==========================
-    policy_prompt = f"""
-你是一个6G核心网策略生成助手。
+    policy_prompt = f"""生成网络策略JSON，只输出JSON格式：
 
-任务：
-根据意图（intent）和规则库（rulebook），生成策略 JSON（policy）。
-要求：
-- 严格输出 JSON
-- 包含 policy_id, qos_profile, routing_pref, allowed_ue_group
-- qos_profile 必须来自 rulebook，不得改动
-- 不要添加多余字段
-- 不要输出解释
+{{
+  "policy_id": "{intent_pred.get('service_type', 'unknown')}_{intent_pred.get('intent_type', 'unknown')}",
+  "qos_profile": {json.dumps(rulebook, ensure_ascii=False)},
+  "routing_pref": "low_latency",
+  "allowed_ue_group": "{intent_pred.get('service_type', 'unknown')}_users"
+}}
 
-Intent:
-{json.dumps(intent_pred, ensure_ascii=False)}
-
-Rulebook:
-{json.dumps(rulebook, ensure_ascii=False)}
-
-请输出策略 JSON：
-"""
+只输出以上JSON，不要任何解释文字："""
 
     # 模型输出 Policy
     policy_raw = model_fn(policy_prompt)
-    policy_pred, ok_policy = safe_json_parse(policy_raw)
+    policy_pred, ok_policy = smart_json_parse(policy_raw, "policy")
 
     if not ok_policy:
         return {
