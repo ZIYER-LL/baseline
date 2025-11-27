@@ -1,5 +1,20 @@
 import json
-from run_qwen import run_qwen
+import sys
+import torch
+
+# 尝试导入GPU版本，如果失败则使用CPU版本
+try:
+    if torch.cuda.is_available():
+        from run_qwen import run_qwen
+        print("✅ 使用GPU版本的run_qwen")
+    else:
+        from run_qwen_cpu import run_qwen_cpu as run_qwen
+        print("⚠️ CUDA不可用，使用CPU版本的run_qwen")
+except ImportError as e:
+    print(f"❌ 无法导入run_qwen: {e}")
+    print("请检查run_qwen.py或run_qwen_cpu.py文件")
+    sys.exit(1)
+
 from evaluation import safe_json_parse
 from rulebook import RULEBOOKS
 from prompt_builder import build_prompt_intent, build_prompt_policy
@@ -57,7 +72,41 @@ def debug_single_sample(sample_idx: int, test_data: list):
         print(json.dumps(intent_pred, ensure_ascii=False, indent=2))
     else:
         print("❌ Intent解析失败，无法进行后续步骤")
-        return
+        print("调试信息:")
+        print(f"  原始输出长度: {len(intent_raw)}")
+        print(f"  包含 'slice_create': {'slice_create' in intent_raw}")
+        print(f"  包含 'realtime_video': {'realtime_video' in intent_raw}")
+
+        # 尝试手动提取JSON
+        try:
+            start = intent_raw.find('{"intent_type"')
+            if start >= 0:
+                brace_count = 0
+                end = start
+                for i, char in enumerate(intent_raw[start:], start):
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            end = i + 1
+                            break
+                if end > start:
+                    json_str = intent_raw[start:end]
+                    print(f"  提取的JSON字符串: {json_str}")
+                    try:
+                        extracted_json = json.loads(json_str)
+                        print(f"  手动解析成功: {extracted_json}")
+                        intent_pred = extracted_json
+                        ok_intent = True
+                        print("✅ 使用手动提取的JSON继续执行")
+                    except Exception as e:
+                        print(f"  手动解析失败: {e}")
+        except Exception as e:
+            print(f"  手动提取失败: {e}")
+
+        if not ok_intent:
+            return
 
     # ================================
     # Step 2: Policy 推理
@@ -206,3 +255,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
