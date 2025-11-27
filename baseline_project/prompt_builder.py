@@ -11,24 +11,46 @@ service_type选项：realtime_video, realtime_voice_call, realtime_xr_gaming, st
 输出格式：{{"intent_type": "xxx", "service_type": "yyy"}}"""
 
 def build_prompt_policy(intent_pred: dict, rulebook: dict):
-    return f"""
-你是一个6G核心网策略生成助手。
+    # 根据intent_type生成合适的policy_id和routing_pref
+    intent_type = intent_pred.get("intent_type", "slice_create")
+    service_type = intent_pred.get("service_type", "realtime_video")
 
-任务：
-根据意图（intent）和规则库（rulebook），生成策略 JSON（policy）。
+    # 生成policy_id
+    policy_id = f"{service_type}_{intent_type}"
 
-要求：
-- 严格输出 JSON
-- 包含 policy_id, qos_profile, routing_pref, allowed_ue_group
-- qos_profile 必须严格使用 rulebook 中的数值
-- 不要添加多余字段
-- 不要生成解释
+    # 根据intent_type确定routing_pref
+    routing_prefs = {
+        "slice_create": "low_latency",
+        "slice_qos_modify": "qos_optimized",
+        "route_preference": "priority_routing",
+        "access_control": "secure_routing"
+    }
+    routing_pref = routing_prefs.get(intent_type, "default")
 
-Intent:
-{json.dumps(intent_pred, ensure_ascii=False)}
+    # allowed_ue_group可以根据service_type确定
+    ue_groups = {
+        "realtime_video": "video_users",
+        "realtime_voice_call": "voice_users",
+        "realtime_xr_gaming": "gaming_users",
+        "streaming_video": "streaming_users",
+        "streaming_live": "live_users",
+        "file_transfer": "data_users",
+        "iot_sensor": "iot_devices",
+        "internet_access": "internet_users",
+        "urllc_control": "urllc_devices"
+    }
+    allowed_ue_group = ue_groups.get(service_type, "default_group")
 
-Rulebook:
-{json.dumps(rulebook, ensure_ascii=False)}
+    return f"""根据以下信息生成网络策略JSON：
 
-请输出策略 JSON：
-"""
+Intent: {json.dumps(intent_pred, ensure_ascii=False)}
+QoS规则: {json.dumps(rulebook, ensure_ascii=False)}
+
+要求：直接输出JSON，不要任何解释或额外文字。
+
+{{
+  "policy_id": "{policy_id}",
+  "qos_profile": {json.dumps(rulebook, ensure_ascii=False)},
+  "routing_pref": "{routing_pref}",
+  "allowed_ue_group": "{allowed_ue_group}"
+}}"""
