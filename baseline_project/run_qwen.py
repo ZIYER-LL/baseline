@@ -31,17 +31,33 @@ def run_qwen(prompt: str):
     print(f"\n正在处理prompt (长度: {len(prompt)})...")
     inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
 
+    # 检查输入
+    print(f"输入token数量: {inputs['input_ids'].shape[1]}")
+
     try:
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=512,
-            do_sample=False,  # 贪婪解码
-            pad_token_id=tokenizer.eos_token_id  # 避免警告
-        )
+        # 使用最基本的参数避免警告
+        generate_kwargs = {
+            "input_ids": inputs["input_ids"],
+            "attention_mask": inputs.get("attention_mask"),
+            "max_new_tokens": 512,
+            "do_sample": False,
+            "pad_token_id": tokenizer.eos_token_id,
+        }
+
+        # 只在需要时添加参数
+        if hasattr(tokenizer, 'eos_token_id') and tokenizer.eos_token_id is not None:
+            generate_kwargs["eos_token_id"] = tokenizer.eos_token_id
+
+        print("开始生成...")
+        outputs = model.generate(**generate_kwargs)
+
         result = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        print("✅ 生成完成")
+        print(f"✅ 生成完成，输出长度: {len(result)}")
         return result
 
     except Exception as e:
         print(f"❌ 生成失败: {e}")
+        import traceback
+        traceback.print_exc()
         return ""
+
