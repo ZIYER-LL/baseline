@@ -10,9 +10,10 @@ try:
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     print("✅ Tokenizer加载成功")
 
+    # 手动指定使用空闲的GPU（从nvidia-smi看GPU 1,2,3,6,7基本空闲）
     model = AutoModelForCausalLM.from_pretrained(
         model_name,
-        device_map="auto",
+        device_map={"": 1},  # 指定使用GPU 1（基本空闲）
         torch_dtype=torch.float16,  # 使用float16节省内存
         low_cpu_mem_usage=True
     )
@@ -60,4 +61,3 @@ def run_qwen(prompt: str):
         import traceback
         traceback.print_exc()
         return ""
-
