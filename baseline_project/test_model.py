@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 简单的模型测试脚本
 """
@@ -29,3 +28,4 @@ def test_model():
 
 if __name__ == "__main__":
     test_model()
+
