@@ -71,41 +71,43 @@ def debug_single_sample(sample_idx: int, test_data: list):
         print("解析后的JSON:")
         print(json.dumps(intent_pred, ensure_ascii=False, indent=2))
     else:
-        print("❌ Intent解析失败，无法进行后续步骤")
+        print("❌ Intent解析失败，尝试改进解析...")
         print("调试信息:")
         print(f"  原始输出长度: {len(intent_raw)}")
-        print(f"  包含 'slice_create': {'slice_create' in intent_raw}")
-        print(f"  包含 'realtime_video': {'realtime_video' in intent_raw}")
 
-        # 尝试手动提取JSON
-        try:
-            start = intent_raw.find('{"intent_type"')
-            if start >= 0:
-                brace_count = 0
-                end = start
-                for i, char in enumerate(intent_raw[start:], start):
-                    if char == '{':
-                        brace_count += 1
-                    elif char == '}':
-                        brace_count -= 1
-                        if brace_count == 0:
-                            end = i + 1
-                            break
-                if end > start:
-                    json_str = intent_raw[start:end]
-                    print(f"  提取的JSON字符串: {json_str}")
-                    try:
-                        extracted_json = json.loads(json_str)
-                        print(f"  手动解析成功: {extracted_json}")
-                        intent_pred = extracted_json
-                        ok_intent = True
-                        print("✅ 使用手动提取的JSON继续执行")
-                    except Exception as e:
-                        print(f"  手动解析失败: {e}")
-        except Exception as e:
-            print(f"  手动提取失败: {e}")
+        # 改进的JSON提取逻辑：优先选择包含实际值的JSON
+        import re
 
-        if not ok_intent:
+        # 查找所有JSON对象
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        json_matches = re.findall(json_pattern, intent_raw)
+
+        print(f"  找到 {len(json_matches)} 个JSON对象")
+
+        best_json = None
+        for i, json_str in enumerate(json_matches):
+            print(f"  JSON {i+1}: {json_str}")
+            try:
+                parsed = json.loads(json_str)
+                # 优先选择包含实际intent_type值的JSON（不是xxx或模板值）
+                intent_type = parsed.get('intent_type', '')
+                service_type = parsed.get('service_type', '')
+
+                if intent_type and intent_type not in ['xxx', 'intent_type'] and service_type and service_type not in ['yyy', 'service_type']:
+                    best_json = parsed
+                    print(f"  ✅ 找到有效JSON: {parsed}")
+                    break
+            except:
+                continue
+
+        if best_json:
+            intent_pred = best_json
+            ok_intent = True
+            print("✅ 使用改进解析的JSON继续执行")
+            print("解析后的JSON:")
+            print(json.dumps(intent_pred, ensure_ascii=False, indent=2))
+        else:
+            print("❌ 无法找到有效的JSON")
             return
 
     # ================================
@@ -255,4 +257,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
