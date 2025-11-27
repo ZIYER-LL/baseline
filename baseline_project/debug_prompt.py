@@ -138,7 +138,44 @@ def debug_single_sample(sample_idx: int, test_data: list):
         print("解析后的JSON:")
         print(json.dumps(policy_pred, ensure_ascii=False, indent=2))
     else:
-        print("❌ Policy解析失败")
+        print("❌ Policy解析失败，尝试改进解析...")
+        print("调试信息:")
+
+        # 改进的JSON提取逻辑：优先选择包含完整结构的JSON
+        import re
+
+        # 查找所有JSON对象
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        json_matches = re.findall(json_pattern, policy_raw)
+
+        print(f"  找到 {len(json_matches)} 个JSON对象")
+
+        best_json = None
+        for i, json_str in enumerate(json_matches):
+            print(f"  JSON {i+1}: {json_str[:100]}{'...' if len(json_str) > 100 else ''}")
+            try:
+                parsed = json.loads(json_str)
+                # 验证Policy JSON的必需字段
+                required_fields = ["policy_id", "qos_profile", "routing_pref", "allowed_ue_group"]
+                if all(field in parsed for field in required_fields):
+                    # 检查qos_profile是否包含必需的QoS参数
+                    qos_profile = parsed.get("qos_profile", {})
+                    if isinstance(qos_profile, dict) and len(qos_profile) > 0:
+                        best_json = parsed
+                        print(f"  ✅ 找到有效的Policy JSON: policy_id={parsed.get('policy_id')}")
+                        break
+            except Exception as e:
+                print(f"    解析失败: {e}")
+                continue
+
+        if best_json:
+            policy_pred = best_json
+            ok_policy = True
+            print("✅ 使用改进解析的Policy JSON继续执行")
+            print("解析后的JSON:")
+            print(json.dumps(policy_pred, ensure_ascii=False, indent=2))
+        else:
+            print("❌ 无法找到有效的Policy JSON")
 
 
 def debug_interactive(test_data: list):
